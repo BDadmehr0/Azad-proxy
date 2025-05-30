@@ -1,0 +1,11 @@
+{
+    "proxy_host": "127.0.0.1",
+    "proxy_port": 4500,
+    "doh_url": "https://cloudflare-dns.com/dns-query?dns=",
+    "offline_dns": {
+        "twitter.com": "104.244.42.1",
+        "cloudflare-dns.com": "203.32.120.226"
+    },
+    "allow_insecure": true
+}
+
