@@ -17,7 +17,7 @@
 1. مخزن را کلون کنید:
 
 ```bash
-git clone https://github.com/your-username/azad-proxy.git
+git clone https://github.com/BDadmehr0/azad-proxy.git
 cd azad-proxy
 ```
 
