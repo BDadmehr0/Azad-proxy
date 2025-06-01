@@ -1,0 +1,12 @@
+{
+    "proxy_host": "127.0.0.1",
+    "proxy_port": 4500,
+    "doh_urls": [
+        "https://cloudflare-dns.com/dns-query?dns=",
+        "https://dns.google/dns-query?dns="
+    ],
+    "dns_timeout": 3,
+    "max_workers": 50,
+    "allow_insecure": true,
+    "offline_dns_file": "configs/offline_dns.json"
+}
