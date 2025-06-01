@@ -1,50 +1,39 @@
-# pylint: disable=too-few-public-methods
-
 """
 doh_resolver.py
 
-A simple DNS-over-HTTPS (DoH) resolver using the requests and dnspython libraries.
-Supports optional local overrides and caching of resolved addresses.
+A DNS-over-HTTPS (DoH) resolver with local fallback and cache.
+
+✅ Encrypted DNS to avoid filtering/DPI.
+✅ Supports internal/local DNS overrides (e.g., for in-country resolution).
 """
 
 import base64
 
-import requests
-from requests.exceptions import RequestException
 import dns.message
 import dns.rdatatype
+import requests
+import urllib3
+from requests.exceptions import RequestException
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class DoHResolver:
-    """
-    DNS-over-HTTPS resolver with support for local DNS overrides and caching.
-    """
-
-    def __init__(self, doh_url: str, offline_dns: dict, allow_insecure=False):
-        """
-        Initialize the DoH resolver.
-
-        :param doh_url: Base URL of the DoH server (should end with `?dns=` for GET).
-        :param offline_dns: A dictionary of domain-to-IP mappings for local overrides.
-        :param allow_insecure: If True, disables SSL certificate verification (not recommended).
-        """
+    def __init__(self, doh_url: str, offline_dns: dict = None, allow_insecure=False):
         self.doh_url = doh_url
-        self.offline_dns = offline_dns
+        self.offline_dns = offline_dns or {}
         self.cache = {}
         self.session = requests.Session()
         self.allow_insecure = allow_insecure
 
     def resolve(self, domain: str) -> str:
-        """
-        Resolve the given domain name to an IPv4 address using DNS-over-HTTPS.
-
-        :param domain: The domain name to resolve.
-        :return: The resolved IP address as a string, or None if resolution fails.
-        """
         if domain in self.offline_dns:
-            return self.offline_dns[domain]
+            ip = self.offline_dns[domain]
+            print(f"[Offline DNS] {domain} => {ip}")
+            return ip
 
         if domain in self.cache:
+            print(f"[Cache] {domain} => {self.cache[domain]}")
             return self.cache[domain]
 
         try:
@@ -66,9 +55,9 @@ class DoHResolver:
                     if rrset.rdtype == dns.rdatatype.A:
                         ip = rrset[0].address
                         self.cache[domain] = ip
+                        print(f"[DoH Resolver] {domain} => {ip}")
                         return ip
-
         except (RequestException, dns.exception.DNSException) as e:
-            print(f"[DoH Resolver] Failed to resolve {domain}: {e}")
+            print(f"[DoH Error] Could not resolve {domain}: {e}")
 
         return None
